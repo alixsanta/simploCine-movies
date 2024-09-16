@@ -1,0 +1,23 @@
+name: CD for movies Microservice
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/simploCine-movies:latest
+            docker stop simploCine-movies || true
+            docker rm simploCine-movies || true
+            sudo docker run -d --name simploCine-movies -p 80:80 ${{ secrets.DOCKER_USERNAME }}/simploCine-movies:latest
